@@ -1,0 +1,38 @@
+model "Magic Square"               ! Start a new model
+
+uses "mmxprs"                       ! Load the optimizer library
+
+declarations
+ n = 6
+ indexes = 1..n
+ m = (n*n)*(n*n+1)/2/n
+ 
+ x: array(indexes, indexes) of mpvar
+ y: array(indexes, indexes, indexes, indexes) of mpvar
+ z: array(indexes, indexes, indexes, indexes) of mpvar 
+ 
+end-declarations
+
+ feasibility := sum(i in indexes, j in indexes) x(i,j) -(m*n)
+ 
+ forall(i in indexes) sum(j in indexes) x(i,j) = m ! row-by-row
+ forall(j in indexes) sum(i in indexes) x(i,j) = m ! column-by-column
+ sum(i in indexes) x(i,i) = m                      ! diagonal right-to-left
+ sum(i in indexes) x(i,(n+1-i)) = m                ! diagonal left-to-right
+ 
+ forall(i in indexes, j in indexes, ii in indexes, jj in indexes | i <> ii or j <> jj) x(i,j) - x(ii,jj) + m*y(i,j,ii,jj) >= 1
+ forall(i in indexes, j in indexes, ii in indexes, jj in indexes | i <> ii or j <> jj) x(i,j) - x(ii,jj) - m*z(i,j,ii,jj) <= -1
+ forall(i in indexes, j in indexes, ii in indexes, jj in indexes | i <> ii or j <> jj) y(i,j,ii,jj) + z(i,j,ii,jj) = 1 
+ 
+ forall(i in indexes, j in indexes ) x(i,j) is_integer  ! All x s are integer
+ forall(i in indexes, j in indexes, ii in indexes, jj in indexes | i <> ii or j <> jj) y(i,j,ii,jj) is_binary  ! All y s are binary
+ forall(i in indexes, j in indexes, ii in indexes, jj in indexes | i <> ii or j <> jj) z(i,j,ii,jj) is_binary  ! All z s are binary
+ forall(i in indexes, j in indexes ) x(i,j) >= 1        ! non-negativity
+  
+ minimize(feasibility)                   ! Solve the MIP-problem
+
+                                    
+ 
+ forall(i in indexes, j in indexes )  writeln(" x(", i, j, "): ", x(i,j).sol) ! Print out the solution
+ writeln("Solution:\n Objective: ", getobjval) 
+end-model
