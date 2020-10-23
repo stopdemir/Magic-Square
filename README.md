@@ -1,2 +1,2 @@
 # Magic-Square
-Integer Programming Implementation for Magic Square Problem
+Integer Programming Xpress Implementation for Magic Square Problem
